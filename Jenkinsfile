@@ -3,43 +3,38 @@ pipeline {
 
   environment {
     DOCKER_HUB_USER = 'talhac'
-    DOCKER_HUB_PASS = credentials('dockerhub-creds')
+    DOCKER_HUB_PASS = credentials('dockerhub-creds')  // This should be the ID you gave in Jenkins credentials
     IMAGE_TAG = 'latest'
   }
 
   stages {
-    stage('Clone Repo') {
+    stage('Checkout Code') {
       steps {
-        git branch: 'main', url: 'https://github.com/talhachinchali/devopsLearning.git'
+        git 'https://github.com/talhachinchali/devopsLearning.git'
       }
     }
 
-    stage('Build & Push user-service') {
+    stage('Build Docker Image') {
       steps {
-        sh """
-          docker build -t $DOCKER_HUB_USER/user-service:$IMAGE_TAG ./user-service
-          echo $DOCKER_HUB_PASS | docker login -u $DOCKER_HUB_USER --password-stdin
-          docker push $DOCKER_HUB_USER/user-service:$IMAGE_TAG
-        """
+        sh 'docker build -t $DOCKER_HUB_USER/user-service:$IMAGE_TAG ./user-service'
       }
     }
 
-    stage('Build & Push product-service') {
+    stage('Docker Login') {
       steps {
-        sh """
-          docker build -t $DOCKER_HUB_USER/product-service:$IMAGE_TAG ./product-service
-          echo $DOCKER_HUB_PASS | docker login -u $DOCKER_HUB_USER --password-stdin
-          docker push $DOCKER_HUB_USER/product-service:$IMAGE_TAG
-        """
+        sh "echo $DOCKER_HUB_PASS | docker login -u $DOCKER_HUB_USER --password-stdin"
+      }
+    }
+
+    stage('Push to Docker Hub') {
+      steps {
+        sh 'docker push $DOCKER_HUB_USER/user-service:$IMAGE_TAG'
       }
     }
 
     stage('Deploy to Kubernetes') {
       steps {
-        sh """
-          kubectl apply -f ./k8s/user-deployment.yaml
-          kubectl apply -f ./k8s/product-deployment.yaml
-        """
+        sh 'kubectl apply -f ./k8s/user-deployment.yaml'
       }
     }
   }
