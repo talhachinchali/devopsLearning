@@ -3,7 +3,7 @@ pipeline {
 
   environment {
     DOCKER_HUB_USER = 'talhac'
-    DOCKER_HUB_PASS = credentials('dockerhub-creds')  // This should be the ID you gave in Jenkins credentials
+    DOCKER_HUB_PASS = 'dckr_pat_ZT6AAu0epSurBmOeiKlUsuNPVho' 
     IMAGE_TAG = 'latest'
   }
 
