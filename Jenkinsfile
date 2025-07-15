@@ -35,6 +35,7 @@ pipeline {
     stage('Deploy to Kubernetes') {
       steps {
         sh 'kubectl apply -f ./k8s/user-deployment.yaml'
+        sh 'kubectl rollout restart deployment user-service'
       }
     }
   }
